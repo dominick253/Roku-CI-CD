@@ -30,7 +30,7 @@ Roll your own Roku CI/CD pipeline—leveraging BrighterScript (`bsc`) for builds
 2. **Pull & Checkout**
   
 ```bash
-git clone --depth=1 https://github.com/your-org/your-channel.git $WORKDIR
+git clone --depth=1 https://github.com/dominick253/Roku-CI-CD.git $WORKDIR
 cd $WORKDIR
 git checkout $GITHUB_REF
 
