@@ -1,0 +1,74 @@
+# .github/workflows/roku-ci.yml
+
+name: Roku CI/CD
+
+on:
+  push:
+    branches:
+      - develop
+      - main
+  pull_request:
+
+jobs:
+  build-deploy-test:
+    # Your self-hosted runner tag groups (adjust as needed)
+    runs-on: [self-hosted, roku, linux]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Node.js & BrighterScript
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      - name: Build Roku channel
+        uses: rokucommunity/roku-ci@v1
+        with:
+          action: build
+          config: bsconfig.json
+
+      - name: Deploy to Roku device
+        uses: rokucommunity/roku-ci@v1
+        with:
+          action: deploy
+          device_ip: ${{ secrets.ROKU_DEVICE_IP }}
+          device_pin: ${{ secrets.ROKU_DEVICE_PIN }}
+
+      - name: Run Automated Tests (ATF)
+        if: always()
+        uses: rokucommunity/roku-ci@v1
+        with:
+          action: test
+          device_ip: ${{ secrets.ROKU_DEVICE_IP }}
+          test_spec: tests/atf-spec.json
+          output: reports/atf.log
+
+      - name: Upload ATF logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: atf-logs
+          path: reports/atf.log
+
+      - name: Notify Slack on failure
+        if: failure()
+        uses: slackapi/slack-github-action@v1.25.0
+        with:
+          payload: |
+            {
+              "text": ":x: Roku CI failed on `${{ github.sha }}` in `${{ github.ref }}`",
+              "attachments": [
+                {
+                  "text": "See logs: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+                }
+              ]
+            }
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
