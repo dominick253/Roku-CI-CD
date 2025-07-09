@@ -7,12 +7,12 @@ Roll your own Roku CI/CD pipeline—leveraging BrighterScript (`bsc`) for builds
 ## 1. Repository Layout & Branch Strategy
 
 1. **Monorepo or Single‑Channel Repo**  
-
+```
 /src ← Your channel code (BrightScript & assets)
 /tests ← ECP‑driven ATF tests (JSON test specs)
 /ci ← CI helper scripts (build, deploy, test)
 .github/workflows ← (Optional) GitHub Actions for auxiliary jobs
-
+```
 2. **Branch Model**  
 1. `main` (production)  
 2. `develop` (integration)  
