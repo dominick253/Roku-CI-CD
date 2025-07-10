@@ -4,19 +4,18 @@
 
 This project provides a fully automated, self-hosted CI/CD pipeline for Roku app development, leveraging:
 
-    GitHub Actions for webhook-triggered builds
+    GitHub Actions for git push origin test - triggered builds
 
-    Custom Linux runner for local signing & deployment
+    Custom Linux runner for local building & deployment
 
-    BrighterScript (bsc) for clean builds & linting
+    BrighterScript (bsc) for clean build, linting & deployment
 
-    ECP device deployment & automated smoke tests
+    ECP device deployment & automated tests
 
 <h1>Features</h1>
 
-✅ **Automatic build on push or PR to main / develop
+✅ **Automatic build on push to test
 ✅ BrighterScript linting & compilation checks
-✅ Packaging with developer certificate & password
 ✅ Deploys to a Roku device via ECP for smoke tests
 ✅ Version tagging & artifact archiving for releases
 ✅ Modular, extensible structure for team pipelines
