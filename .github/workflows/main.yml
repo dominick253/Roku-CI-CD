@@ -1,75 +1,50 @@
 # .github/workflows/roku-ci.yml
 
 name: Roku CI/CD
-
 on:
   push:
     branches:
-      - develop
-      - main
-      - master
-  pull_request:
-
+      - test
+      
 jobs:
   build-deploy-test:
-    # Your self-hosted runner tag groups (adjust as needed)
-    runs-on: [self-hosted, roku, linux]
-
+    runs-on: [self-hosted, Linux, X64]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install Node.js & BrighterScript
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-
-      - name: Install dependencies
+      - name: Pull latest changes
         run: |
-          npm ci
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          git fetch origin test
+          git checkout test
+          git reset --hard origin/test
 
-      - name: Build Roku channel
-        uses: rokucommunity/roku-ci@v1
-        with:
-          action: build
-          config: bsconfig.json
+      - name: Run BrighterScript build
+        run: bsc
+        working-directory: ./
+      
+      - name: Start Roku debug log capture in background
+        run: |
+          nohup nc 10.71.71.152 8085 > roku_telnet_log.txt 2>&1 &
+          echo $! > telnet_pid.txt
+        shell: bash
+      
+      - name: Run ECP tests
+        run: node scripts/run-tests.js
 
-      - name: Deploy to Roku device
-        uses: rokucommunity/roku-ci@v1
-        with:
-          action: deploy
-          device_ip: ${{ secrets.ROKU_DEVICE_IP }}
-          device_pin: ${{ secrets.ROKU_DEVICE_PIN }}
+      - name: Stop Roku debug log capture
+        run: |
+          kill $(cat telnet_pid.txt) || echo "Log capture process already stopped"
+        shell: bash
 
-      - name: Run Automated Tests (ATF)
-        if: always()
-        uses: rokucommunity/roku-ci@v1
-        with:
-          action: test
-          device_ip: ${{ secrets.ROKU_DEVICE_IP }}
-          test_spec: tests/atf-spec.json
-          output: reports/atf.log
-
-      - name: Upload ATF logs
-        if: failure()
+      - name: Upload test output
         uses: actions/upload-artifact@v4
         with:
-          name: atf-logs
-          path: reports/atf.log
+          name: test-output
+          path: test_output.json
 
-      - name: Notify Slack on failure
-        if: failure()
-        uses: slackapi/slack-github-action@v1.25.0
+      - name: Upload telnet logs
+        uses: actions/upload-artifact@v4
         with:
-          payload: |
-            {
-              "text": ":x: Roku CI failed on `${{ github.sha }}` in `${{ github.ref }}`",
-              "attachments": [
-                {
-                  "text": "See logs: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-                }
-              ]
-            }
-        env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          name: roku-telnet-logs
+          path: roku_telnet_log.txt
