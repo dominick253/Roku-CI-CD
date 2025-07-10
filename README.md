@@ -32,6 +32,7 @@ This project provides a fully automated, self-hosted CI/CD pipeline for Roku app
 └── README.md
 ```
 <h1>BrigherScript CLI Command</h1>
+
 ```bash
    bsc
 ```
