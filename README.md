@@ -75,14 +75,18 @@ ROKU_DEV_USER	Usually rokudev
 ROKU_DEV_PASSWORD	Your developer mode password
 ROKU_SIGNING_KEY	Your developerID or path to .pkg
 ROKU_SIGNING_PASSWORD	Signing password
+
+
 3️⃣ Install & Configure Runner (if self-hosting)
 
 # On your self-hosted Linux box:
+```bash
 mkdir actions-runner && cd actions-runner
 curl -o actions-runner-linux-x64-2.325.0.tar.gz -L https://github.com/actions/runner/releases/download/v2.325.0/actions-runner-linux-x64-2.325.0.tar.gz
 tar xzf actions-runner-linux-x64-2.325.0.tar.gz
 ./config.sh --url https://github.com/YOUR_USERNAME/CI-CD-Roku --token YOUR_TOKEN
 ./run.sh
+```
 
 Note: You can set up the github runner as a service, so you don't have to start it for automated testing in the future, should be in the actions-runner dir after the runner is installed.
 
