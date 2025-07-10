@@ -1,180 +1,96 @@
-# Roku CI/CD Pipeline Guide
+#CI-CD-Roku
 
-Roll your own Roku CI/CD pipeline—leveraging BrighterScript (`bsc`) for builds and giving you full control over webhook‑driven builds, device deploys, and ECP‑based tests.
+🚀 Automated CI/CD Pipeline for Roku SceneGraph & BrighterScript Projects
 
----
+This project provides a fully automated, self-hosted CI/CD pipeline for Roku app development, leveraging:
 
-## 1. Repository Layout & Branch Strategy
+    GitHub Actions for webhook-triggered builds
 
-1. **Monorepo or Single‑Channel Repo**  
+    Custom Linux runner for local signing & deployment
+
+    BrighterScript (bsc) for clean builds & linting
+
+    ECP device deployment & automated smoke tests
+
+#Features
+
+✅ **Automatic build on push or PR to main / develop
+✅ BrighterScript linting & compilation checks
+✅ Packaging with developer certificate & password
+✅ Deploys to a Roku device via ECP for smoke tests
+✅ Version tagging & artifact archiving for releases
+✅ Modular, extensible structure for team pipelines
+
+
+#Project Structure
+
 ```
-/src ← Your channel code (BrightScript & assets)
-/tests ← ECP‑driven ATF tests (JSON test specs)
-/ci ← CI helper scripts (build, deploy, test)
-.github/workflows ← (Optional) GitHub Actions for auxiliary jobs
-```
-2. **Branch Model**  
-1. `main` (production)  
-2. `develop` (integration)  
-3. `feature/{…}` for in‑flight work  
-
----
-
-## 2. GitHub Webhook → Build Server
-
-1. **Webhook Receiver**  
-- A tiny Node.js (Express) or Python (Flask) service with an endpoint like `/github-webhook`.  
-- Verifies GitHub HMAC signature.  
-- Filters for `push` (or `workflow_dispatch`) on `develop` or PR events.  
-
-2. **Pull & Checkout**
-  
-```bash
-git clone --depth=1 https://github.com/dominick253/Roku-CI-CD.git
-cd Roku-CI-CD
-git checkout $GITHUB_REF
-
-
-    Dependency Install
-
-    npm ci       # for any JS tooling or test runners
-    pip install -r requirements.txt  # if using Python helpers
+.
+├── .github/workflows/         # GitHub Actions workflows
+├── scripts/                   # Helper scripts for build/deploy
+├── src/                       # Roku source code (SceneGraph / BrighterScript)
+└── README.md
 ```
 
-3. Build with BrighterScript (bsc)
+    roku-deploy.yml — CI workflow for lint, build, deploy
 
-    Build Script (ci/build.sh):
-```bash
-#!/usr/bin/env bash
-set -e
-bsc --config=bsconfig.json
-zip -r dist/Channel.zip out/manifest out/source out/components
-```
+    scripts/package.sh — Packages your Roku app
 
-bsconfig.json should include:
+    scripts/deploy.sh — Pushes package to Roku device via ECP
 
-```json
-    {
-      "entries": ["src/manifest"],
-      "outDir": "out",
-      "rootDir": "src",
-      "files": ["src/components", "src/source"]
-    }
-```
+    scripts/lint.sh — Runs bsc linting & compile checks
 
-    Output
+#Prerequisites
 
-        A deployable ZIP in dist/Channel.zip.
+    GitHub repository
 
-4. Device Deployment via ECP
+    Roku device on same LAN (developer mode enabled)
 
-    Prerequisites
+    Developer certificate & password
 
-        Roku in Developer Mode at 10.71.71.152
+    Self-hosted Linux runner (or local machine) with:
 
-        A device PIN set for installs.
+        Node.js (bsc)
 
-    Deploy Script (ci/deploy.sh):
+        curl
 
-```bash
-#!/usr/bin/env bash
-set -e
-DEVICE_IP="10.71.71.152"
-DEVICE_PIN="<YOUR_DEVICE_PIN>"
-curl -d @"dist/Channel.zip" \
-  -u :$DEVICE_PIN \
-  -H "Content-Type: application/zip" \
-  "http://$DEVICE_IP/plugin_install"
-```
+        zip/unzip
 
-Verify Install
+        GitHub Actions runner
 
-```bash
-    curl "http://10.71.71.152/query/apps" | grep "Your Channel Name"
-```
+#Setup
+1️⃣ Enable Developer Mode on Roku
 
-5. Automated Testing with ECP (ATF)
+    Home 3x, Up 2x, Right, Left, Right, Left, Right
 
-    Trigger Tests (ci/test.sh):
+    Enable Developer Mode, set password, note IP address.
 
-```bash
-#!/usr/bin/env bash
-set -e
-DEVICE_IP="10.71.71.152"
-curl \
-  -H "Content-Type: application/json" \
-  -d @tests/atf-spec.json \
-  "http://$DEVICE_IP/robot/run"
-```
+2️⃣ Configure Secrets
 
-Poll for Results:
+Add these repository secrets on GitHub:
+Secret Name	Description
+ROKU_DEV_IP	Roku device IP address
+ROKU_DEV_USER	Usually rokudev
+ROKU_DEV_PASSWORD	Your developer mode password
+ROKU_SIGNING_KEY	Your developerID or path to .pkg
+ROKU_SIGNING_PASSWORD	Signing password
+3️⃣ Install & Configure Runner (if self-hosting)
 
-```bash
-    # wait for completion, then:
-    curl "http://10.71.71.152/robot/log" > reports/atf.log
-```
+# On your self-hosted Linux box:
+mkdir actions-runner && cd actions-runner
+curl -o actions-runner-linux-x64-2.325.0.tar.gz -L https://github.com/actions/runner/releases/download/v2.325.0/actions-runner-linux-x64-2.325.0.tar.gz
+tar xzf actions-runner-linux-x64-2.325.0.tar.gz
+./config.sh --url https://github.com/YOUR_USERNAME/CI-CD-Roku --token YOUR_TOKEN
+./run.sh
 
-    Parse & Report
-```bash
-        grep "FAILED" reports/atf.log → exit code
-```
-        Archive logs/screenshots to your CI dashboard or S3.
+4️⃣ Push to Trigger Build
 
-6. Orchestration & Notifications
+Commit & push to test, and GitHub Actions will:
 
-    Orchestrator Script (ci/pipeline.sh):
-```bash
-    #!/usr/bin/env bash
-    set -e
-    ./ci/build.sh
-    ./ci/deploy.sh
-    ./ci/test.sh
-```
+    Run lint & build
 
-    Status Hooks
+    Package the app
 
-        On success/failure, POST back to GitHub via the Status API.
+    Deploy to Roku device
 
-        Send Slack/Webhook alerts with test logs.
-
-7. Scaling & Enhancements
-
-    Parallel Devices: maintain a small device‑farm, pass device IP via matrix orchestrator.
-
-    Containerize: Dockerize build/test toolchain for consistent environments.
-
-    Caching: Persist node_modules or bsc cache between runs.
-
-    Security: Store your device PIN and webhook secret in an encrypted vault (e.g., AWS Secrets Manager).
-
-8. Alternative: Hybrid with GitHub Actions + Self‑Hosted Runners
-
-Use the roku-ci GitHub Action for a quicker setup:
-
-```yml
-# .github/workflows/ci.yml
-on:
-  push:
-    branches: [ develop, main ]
-  pull_request:
-
-jobs:
-  build-deploy-test:
-    runs-on: self-hosted   # your runner with network access to 10.71.71.152
-    steps:
-      - uses: actions/checkout@v3
-      - name: Build
-        uses: rokucommunity/roku-ci@v1
-        with:
-          action: build
-      - name: Deploy
-        uses: rokucommunity/roku-ci@v1
-        with:
-          action: deploy
-          device_ip: 10.71.71.152
-          device_pin: ${{ secrets.ROKU_PIN }}
-      - name: Test
-        uses: rokucommunity/roku-ci@v1
-        with:
-          action: test
-```
+    Run ECP-based smoke tests
