@@ -1,0 +1,9 @@
+function jsonParseTestFromHttpURLTransfer()
+    xfer = CreateObject("roUrlTransfer")
+    xfer.SetUrl("https://nazarene.dominickp.com/feed")
+
+    response = xfer.GetToString()
+    print response
+end function
+
+jsonParseTestFromHttpURLTransfer()

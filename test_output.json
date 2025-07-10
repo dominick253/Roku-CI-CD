@@ -1,0 +1,41 @@
+Test Timestamp: 2025-07-10T15:48:14.944Z
+
+Parsed Media-Player State:
+{
+  "state": "play",
+  "error": "false",
+  "plugin": {
+    "id": "dev",
+    "name": "Manteno Church Of The Nazarene",
+    "bandwidth": "68315299 bps"
+  },
+  "format": {
+    "audio": "aac",
+    "video": "mpeg4_10b",
+    "captions": "none",
+    "drm": "none",
+    "container": "hls"
+  },
+  "buffering": {
+    "target": "0",
+    "max": "1000",
+    "current": "1000"
+  },
+  "new_stream": {
+    "speed": "128000 bps"
+  },
+  "position": "1600 ms",
+  "duration": "4697600 ms",
+  "is_live": {
+    "_": "false",
+    "blocked": "false"
+  },
+  "stream_segment": {
+    "media_sequence": "0",
+    "time": "0",
+    "bitrate": "224000",
+    "segment_type": "audio",
+    "width": "0",
+    "height": "0"
+  }
+}

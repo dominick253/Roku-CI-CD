@@ -1,0 +1,17 @@
+{
+    "rootDir": "src",
+    "files": [
+        "source/**/*",
+        "components/**/*",
+        "images/**/*",
+        "manifest"
+    ],
+    "stagingDir": "dist",
+    "autoImportComponentScript": true,
+    "sourceMap": true,
+    "allowBrighterScriptInBrightScript": true,
+    "createPackage": true,
+    "deploy": true,
+    "host": "10.71.71.152",
+    "password": "1986"
+}
