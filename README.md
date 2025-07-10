@@ -31,14 +31,12 @@ This project provides a fully automated, self-hosted CI/CD pipeline for Roku app
 ├── src/                       # Roku source code (SceneGraph / BrighterScript)
 └── README.md
 ```
-
-    roku-deploy.yml — CI workflow for lint, build, deploy
-
-    scripts/package.sh — Packages your Roku app
-
-    scripts/deploy.sh — Pushes package to Roku device via ECP
-
-    scripts/lint.sh — Runs bsc linting & compile checks
+```bash
+   bsc
+```
+    Packages your Roku app
+    Pushes package to Roku device via ECP
+    Runs bsc linting & compile checks
 
 <h1>Prerequisites</h1>
 
@@ -57,6 +55,7 @@ This project provides a fully automated, self-hosted CI/CD pipeline for Roku app
         zip/unzip
 
         GitHub Actions runner
+
 
 <h1>Setup</h1>
 1️⃣ Enable Developer Mode on Roku
@@ -82,6 +81,8 @@ curl -o actions-runner-linux-x64-2.325.0.tar.gz -L https://github.com/actions/ru
 tar xzf actions-runner-linux-x64-2.325.0.tar.gz
 ./config.sh --url https://github.com/YOUR_USERNAME/CI-CD-Roku --token YOUR_TOKEN
 ./run.sh
+
+Note: You can set up the github runner as a service, so you don't have to start it for automated testing in the future, should be in the actions-runner dir after the runner is installed.
 
 4️⃣ Push to Trigger Build
 
