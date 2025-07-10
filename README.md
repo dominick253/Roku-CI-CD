@@ -1,4 +1,4 @@
-#CI-CD-Roku
+<h1>CI-CD-Roku</h1>
 
 🚀 Automated CI/CD Pipeline for Roku SceneGraph & BrighterScript Projects
 
@@ -12,7 +12,7 @@ This project provides a fully automated, self-hosted CI/CD pipeline for Roku app
 
     ECP device deployment & automated smoke tests
 
-#Features
+<h1>Features</h1>
 
 ✅ **Automatic build on push or PR to main / develop
 ✅ BrighterScript linting & compilation checks
@@ -22,7 +22,7 @@ This project provides a fully automated, self-hosted CI/CD pipeline for Roku app
 ✅ Modular, extensible structure for team pipelines
 
 
-#Project Structure
+<h1>Project Structure</h1>
 
 ```
 .
@@ -40,7 +40,7 @@ This project provides a fully automated, self-hosted CI/CD pipeline for Roku app
 
     scripts/lint.sh — Runs bsc linting & compile checks
 
-#Prerequisites
+<h1>Prerequisites</h1>
 
     GitHub repository
 
@@ -58,7 +58,7 @@ This project provides a fully automated, self-hosted CI/CD pipeline for Roku app
 
         GitHub Actions runner
 
-#Setup
+<h1>Setup</h1>
 1️⃣ Enable Developer Mode on Roku
 
     Home 3x, Up 2x, Right, Left, Right, Left, Right
